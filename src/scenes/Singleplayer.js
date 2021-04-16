@@ -1,40 +1,67 @@
 class Singleplayer extends Phaser.Scene {
     constructor() {
-        super("playScene");
+        super("singleplayerScene");
     }
 
     preload() {
-        this.load.image('starfield', 'assets/starfield.png');
+        this.load.image('sky', 'assets/sky.png');
+        this.load.image('background3', 'assets/background3.png');
+        this.load.image('background2', 'assets/background2.png');
+        this.load.image('background1', 'assets/background1.png');
         this.load.image('rocket', 'assets/rocket.png');
-        this.load.image('spaceship', 'assets/spaceship.png');
+        this.load.image('plane1', 'assets/plane1.png');
+        this.load.image('plane2', 'assets/plane2.png');
         // load spritesheet
         this.load.spritesheet('explosion', './assets/explosion.png', 
             {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9});
     }
 
     create() {
+        this.sky = this.add.tileSprite(
+            0,0,640,480, 'sky'
+        ).setOrigin(0,0);
 
-        this.starfield = this.add.tileSprite(
-            0,0,640,480, 'starfield'
+        this.background3 = this.add.tileSprite(
+            0,0,640,480, 'background3'
+        ).setOrigin(0,0);
+
+        this.background2 = this.add.tileSprite(
+            0,0,640,480, 'background2'
+        ).setOrigin(0,0);
+
+        this.background1 = this.add.tileSprite(
+            0,0,640,480, 'background1'
         ).setOrigin(0,0);
 
         this.p1Rocket = new Rocket(
             this,
             game.config.width/2,
             game.config.height - borderUISize - borderPadding,
-            'rocket'
+            'rocket',
         );
+        this.p1Rocket.setFireType('U');
 
         // add spaceships (x3)
         this.ship1 = new Ship(this, game.config.width + 
-            borderUISize*6, borderUISize*4, 'spaceship', 
+            borderUISize*6, borderUISize*4, 'plane1', 
             0, 30).setOrigin(0, 0);
         this.ship2 = new Ship(this, game.config.width + 
             borderUISize*3, borderUISize*5 + borderPadding*2, 
-            'spaceship', 0, 20).setOrigin(0,0);
+            'plane1', 0, 20).setOrigin(0,0);
         this.ship3 = new Ship(this, game.config.width, 
-            borderUISize*6 + borderPadding*4, 'spaceship', 0, 
+            borderUISize*6 + borderPadding*4, 'plane1', 0, 
             10).setOrigin(0,0);
+        this.ship4 = new Ship(this, game.config.width, 
+            borderUISize*4, 'plane2', 0, 
+            40).setOrigin(0,0);
+        this.ship4.setMoveSpeed(5);
+
+        this.ships = [];
+        this.ships.push(this.ship1);
+        this.ships.push(this.ship2);
+        this.ships.push(this.ship3);
+        this.ships.push(this.ship4);
+        
 
         // green UI background
         this.add.rectangle(
@@ -51,11 +78,10 @@ class Singleplayer extends Phaser.Scene {
 	    this.add.rectangle(0, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0 ,0);
 	    this.add.rectangle(game.config.width - borderUISize, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0 ,0);
 
-        keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);      
-    
+        keyUP    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         // animation config
         this.anims.create({
             key: 'explode',
@@ -111,7 +137,10 @@ class Singleplayer extends Phaser.Scene {
             this.scene.start("menuScene");
         }
 
-        this.starfield.tilePositionX -= 4;
+        this.sky.tilePositionX -= 1.5;
+        this.background3.tilePositionX -= 1.25;
+        this.background2.tilePositionX -= 1;
+        this.background1.tilePositionX -= 0.75;
         
         if (!this.gameOver) {
             this.p1Rocket.update();
@@ -121,24 +150,18 @@ class Singleplayer extends Phaser.Scene {
         }
 
         // check collisions
-        if(this.checkCollision(this.p1Rocket, this.ship3)) {
-            this.p1Rocket.reset();
-            this.shipExplode(this.ship3);   
-        }
-        if (this.checkCollision(this.p1Rocket, this.ship2)) {
-            this.p1Rocket.reset();
-            this.shipExplode(this.ship2);
-        }
-        if (this.checkCollision(this.p1Rocket, this.ship1)) {
-            this.p1Rocket.reset();
-            this.shipExplode(this.ship1);
+        for (let ship of this.ships) {
+            if(this.checkCollision(this.p1Rocket, ship)) {
+                this.p1Rocket.reset();
+                this.shipExplode(ship);   
+            }
         }
     }
 
     checkCollision(rocket, ship) {
         // simple AABB checking
-        if (rocket.x < ship.x + ship.width && 
-            rocket.x + rocket.width > ship.x && 
+        if (rocket.x < ship.x + ship.width / 2 && 
+            rocket.x + rocket.width / 2 > ship.x && 
             rocket.y < ship.y + ship.height &&
             rocket.height + rocket.y > ship. y) {
                 return true;
