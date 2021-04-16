@@ -54,7 +54,7 @@ class Singleplayer extends Phaser.Scene {
         this.ship4 = new Ship(this, game.config.width, 
             borderUISize*4, 'plane2', 0, 
             40).setOrigin(0,0);
-        this.ship4.setMoveSpeed(5);
+        this.ship4.setMoveSpeed(5, 0);
 
         this.ships = [];
         this.ships.push(this.ship1);
@@ -113,6 +113,12 @@ class Singleplayer extends Phaser.Scene {
             this.p1Score, scoreConfig
         );
 
+        this.timer = this.add.text(
+            game.config.width - 4 * (borderUISize + borderPadding), 
+            borderUISize + borderPadding * 2, 
+            game.settings.gameTimer / 1000, scoreConfig
+        );
+
         // GAME OVER flag
         this.gameOver = false;
 
@@ -155,6 +161,16 @@ class Singleplayer extends Phaser.Scene {
                 this.p1Rocket.reset();
                 this.shipExplode(ship);   
             }
+        }
+
+        this.timer.text = ((this.game.settings.gameTimer 
+            - this.clock.getElapsed()) / 1000);
+
+        if (this.clock.getElapsedSeconds() > 30 && !this.faster) {
+            for (let ship in ships) {
+                ship.setMoveSpeed(5, Math.random() * 0.5 - 0.25);
+            }
+            this.ship4.setMoveSpeed(7, Math.random() * 0.5 - 0.25);
         }
     }
 

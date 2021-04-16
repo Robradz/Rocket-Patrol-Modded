@@ -40,13 +40,13 @@ class Multiplayer extends Phaser.Scene {
         this.p1Rocket = new Rocket(
             this,
             game.config.width/2,
-            game.config.height - borderUISize - borderPadding,
+            game.config.height - (borderUISize - borderPadding) * 4,
             'rocket'
         );
         this.p1Boat = new Boat(
             this,
             game.config.width/2,
-            game.config.height - borderUISize - borderPadding,
+            game.config.height - (borderUISize - borderPadding) * 4,
             'battleship1'
         );
         this.p1Rocket.setFireType('W');
@@ -56,13 +56,13 @@ class Multiplayer extends Phaser.Scene {
         this.p2Rocket = new Rocket(
             this,
             game.config.width/2,
-            game.config.height - borderUISize - borderPadding,
+            game.config.height - (borderUISize - borderPadding) * 4,
             'rocket'
         );
         this.p2Boat = new Boat(
             this,
             game.config.width/2,
-            game.config.height - borderUISize - borderPadding,
+            game.config.height - (borderUISize - borderPadding) * 4,
             'battleship2'
         );
         this.p2Rocket.setFireType('U');
@@ -82,7 +82,7 @@ class Multiplayer extends Phaser.Scene {
         this.ship4 = new Ship(this, game.config.width, 
             borderUISize*4, 'plane2', 0, 
             40).setOrigin(0,0);
-        this.ship4.setMoveSpeed(5);
+        this.ship4.setMoveSpeed(5, 0);
 
         this.ships = [];
         this.ships.push(this.ship1);
@@ -90,15 +90,6 @@ class Multiplayer extends Phaser.Scene {
         this.ships.push(this.ship3);
         this.ships.push(this.ship4);
         console.log(this.ships);
-
-        // green UI background
-        this.add.rectangle(
-            0,
-            borderUISize + borderPadding,
-            game.config.width,
-            borderUISize * 2,
-            0x00FF00,
-            ).setOrigin(0,0);
 
         // white borders
 	    this.add.rectangle(0, 0, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0 ,0);
@@ -151,6 +142,12 @@ class Multiplayer extends Phaser.Scene {
             borderUISize + borderPadding * 2, 
             this.p2Score, scoreConfig
         );
+        
+        this.timer = this.add.text(
+            game.config.width - 4 * (borderUISize + borderPadding), 
+            borderUISize + borderPadding * 2, 
+            game.settings.gameTimer / 1000, scoreConfig
+        );
 
         // GAME OVER flag
         this.gameOver = false;
@@ -164,6 +161,8 @@ class Multiplayer extends Phaser.Scene {
                 'Press (R) to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
             this.gameOver = true;
         }, null, this);
+
+        this.faster = false;
     }
 
     update() {
@@ -202,6 +201,16 @@ class Multiplayer extends Phaser.Scene {
                 this.p2Rocket.reset();
                 this.shipExplode(ship, this.p2Rocket);   
             }
+        }
+
+        this.timer.text = ((this.game.settings.gameTimer 
+            - this.clock.getElapsed()) / 1000);
+
+        if (this.clock.getElapsedSeconds() > 30 && !this.faster) {
+            for (let ship in ships) {
+                ship.setMoveSpeed(5, Math.random() * 0.5 - 0.25);
+            }
+            this.ship4.setMoveSpeed(7, Math.random() * 0.5 - 0.25);
         }
     }
 
