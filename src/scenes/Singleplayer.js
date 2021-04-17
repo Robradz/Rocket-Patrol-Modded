@@ -167,10 +167,11 @@ class Singleplayer extends Phaser.Scene {
             - this.clock.getElapsed()) / 1000);
 
         if (this.clock.getElapsedSeconds() > 30 && !this.faster) {
-            for (let ship in ships) {
-                ship.setMoveSpeed(5, Math.random() * 0.5 - 0.25);
+            for (let s = 0; s < this.ships.length; s++) {
+                this.ships[s].setMoveSpeed(5, Math.random() * 0.5 - 0.25);
             }
             this.ship4.setMoveSpeed(7, Math.random() * 0.5 - 0.25);
+            this.faster = true;
         }
     }
 
