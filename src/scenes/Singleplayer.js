@@ -8,6 +8,7 @@ class Singleplayer extends Phaser.Scene {
         this.load.image('background3', 'assets/background3.png');
         this.load.image('background2', 'assets/background2.png');
         this.load.image('background1', 'assets/background1.png');
+        this.load.image('battleship1', 'assets/battleship1.png');
         this.load.image('rocket', 'assets/rocket.png');
         this.load.image('plane1', 'assets/plane1.png');
         this.load.image('plane2', 'assets/plane2.png');
@@ -39,7 +40,15 @@ class Singleplayer extends Phaser.Scene {
             game.config.height - borderUISize - borderPadding,
             'rocket',
         );
+        this.p1Boat = new Boat(
+            this,
+            game.config.width/2,
+            game.config.height - (borderUISize - borderPadding) * 4,
+            'battleship1'
+        );
         this.p1Rocket.setFireType('U');
+        this.p1Boat.setFireType('U');
+        this.p1Rocket.linkBoat(this.p1Boat);
 
         // add spaceships (x3)
         this.ship1 = new Ship(this, game.config.width + 
@@ -62,16 +71,6 @@ class Singleplayer extends Phaser.Scene {
         this.ships.push(this.ship3);
         this.ships.push(this.ship4);
         
-
-        // green UI background
-        this.add.rectangle(
-            0,
-            borderUISize + borderPadding,
-            game.config.width,
-            borderUISize * 2,
-            0x00FF00,
-            ).setOrigin(0,0);
-
         // white borders
 	    this.add.rectangle(0, 0, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0 ,0);
 	    this.add.rectangle(0, game.config.height - borderUISize, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0 ,0);
@@ -131,6 +130,8 @@ class Singleplayer extends Phaser.Scene {
                 'Press (R) to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
             this.gameOver = true;
         }, null, this);
+
+        this.faster = false;
     }
 
     update() {
@@ -150,9 +151,11 @@ class Singleplayer extends Phaser.Scene {
         
         if (!this.gameOver) {
             this.p1Rocket.update();
+            this.p1Boat.update();
             this.ship1.update();
             this.ship2.update();
             this.ship3.update();
+            this.ship4.update();
         }
 
         // check collisions
@@ -168,9 +171,9 @@ class Singleplayer extends Phaser.Scene {
 
         if (this.clock.getElapsedSeconds() > 30 && !this.faster) {
             for (let s = 0; s < this.ships.length; s++) {
-                this.ships[s].setMoveSpeed(5, Math.random() * 0.5 - 0.25);
+                this.ships[s].setMoveSpeed(4, Math.random() * 0.5 - 0.25);
             }
-            this.ship4.setMoveSpeed(7, Math.random() * 0.5 - 0.25);
+            this.ship4.setMoveSpeed(5, Math.random() * 0.5 - 0.25);
             this.faster = true;
         }
     }
